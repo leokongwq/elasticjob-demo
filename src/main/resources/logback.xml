@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="app.name" value="elasticjob-demo"/>
+    <property name="log.home" value="/data/logs/elasticjob-demo"/>
+
+    <!-- 将日志输出到控制台-->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>[%-5p] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%logger:%method:%line] %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
+    <!-- 滚动记录文件-->
+    <appender name="DAILY_ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 被写入的文件名，根据业务需求，动态配置文件路径-->
+        <file>${log.home}/${app.name}.log</file>
+        <encoder>
+            <pattern>[%-5p] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%logger:%method:%line] %msg%n</pattern>
+        </encoder>
+        <!-- 级别过滤，临界点判断,>=-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <!-- 滚动策略， 最常用的滚动策略，它根据时间来制定滚动策略-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 定义滚动记录文件的名字，动态配置-->
+            <fileNamePattern>${log.home}/${app.name}.log.%d{yyyy-MM-dd}</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 定义常用的公共的appender  开始-->
+    <appender name ="ASYNC_DAILY_ROLLING_FILE" class= "ch.qos.logback.classic.AsyncAppender">
+        <!--默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+        <!--<discardingThreshold >0</discardingThreshold>-->
+        <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+        <queueSize>640</queueSize>
+        <!-- 是否提取调用者数据，影响性能，默认值false，建议不配置该参数，即取默认值-->
+        <includeCallerData>true</includeCallerData>
+        <!-- 别忘记先升级logback版本 -->
+        <neverBlock>true</neverBlock>
+        <!-- 添加附加的appender,最多只能添加一个 -->
+        <appender-ref ref ="DAILY_ROLLING_FILE"/>
+    </appender>
+
+    <appender name="ERROR_DAILY_ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.home}/${app.name}-error.log</file>
+        <encoder>
+            <pattern>[%-5p] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%logger:%method:%line] %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.home}/${app.name}-error.log.%d{yyyy-MM-dd_HH}</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <appender name ="ASYNC_ERROR_DAILY_ROLLING_FILE" class= "ch.qos.logback.classic.AsyncAppender">
+        <!--默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+        <!--<discardingThreshold >0</discardingThreshold>-->
+        <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+        <queueSize>256</queueSize>
+        <includeCallerData>true</includeCallerData>
+        <!-- 别忘记先升级logback版本 -->
+        <neverBlock>true</neverBlock>
+        <!-- 添加附加的appender,最多只能添加一个 -->
+        <appender-ref ref ="ERROR_DAILY_ROLLING_FILE"/>
+    </appender>
+
+    <logger name="com.dangdang.ddframe.job" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ASYNC_DAILY_ROLLING_FILE"/>
+        <appender-ref ref="ASYNC_ERROR_DAILY_ROLLING_FILE"/>
+    </root>
+</configuration>

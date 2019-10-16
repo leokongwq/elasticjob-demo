@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:reg="http://www.dangdang.com/schema/ddframe/reg"
+       xmlns:job="http://www.dangdang.com/schema/ddframe/job"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.dangdang.com/schema/ddframe/reg
+http://www.dangdang.com/schema/ddframe/reg/reg.xsd
+http://www.dangdang.com/schema/ddframe/job
+http://www.dangdang.com/schema/ddframe/job/job.xsd
+">
+    <!--配置作业注册中心 -->
+    <reg:zookeeper id="regCenter"
+                   server-lists="${elastic.job.zk.host}"
+                   namespace="viptrade-job"
+                   base-sleep-time-milliseconds="1000"
+                   max-sleep-time-milliseconds="3000"
+                   max-retries="10"
+                   session-timeout-milliseconds="30000"
+                   connection-timeout-milliseconds="15000"
+    />
+
+    <!-- 配置作业-->
+    <job:simple id="mySimpleElasticJob" class="com.leokongwq.elasticjob.elasticjobdemo.job.MySimpleElasticJob"
+        registry-center-ref="regCenter"
+        cron="0/30 * * * * ?"
+        job-parameter="name=sky;age=21"
+        sharding-total-count="1"
+        sharding-item-parameters="0=a"
+        max-time-diff-seconds="10"
+        misfire="true"
+        failover="true"
+        overwrite="false"
+        monitor-execution="true"
+        monitor-port="3333"
+        event-trace-rdb-data-source="dataSource"
+        job-exception-handler="com.leokongwq.elasticjob.elasticjobdemo.job.MyJobExceptionHandler"
+    />
+
+    <!-- 配置作业-->
+    <!--<job:simple id="mySimpleElasticJob" job-ref="mySimpleElasticJob"-->
+    <!--registry-center-ref="regCenter"-->
+    <!--cron="0/10 * * * * ?"-->
+    <!--job-parameter="name=sky;age=21"-->
+    <!--sharding-total-count="3"-->
+    <!--sharding-item-parameters="0=A,1=B,2=C"-->
+    <!--monitor-execution="true"-->
+    <!--monitor-port="9999"-->
+    <!--max-time-diff-seconds="10"-->
+    <!--failover="true"-->
+    <!--misfire="true">-->
+
+    <!--<job:listener class="com.leokongwq.elasticjob.elasticjobdemo.job.MyElasticJobListener"/>-->
+    <!--</job:simple>-->
+
+    <!--<job:script id="myScriptJob"-->
+                <!--registry-center-ref="regCenter"-->
+                <!--cron="0/2 * * * * ?"-->
+                <!--sharding-total-count="1"-->
+                <!--sharding-item-parameters="0=shard-0"-->
+                <!--script-command-line="echo 123"-->
+                <!--/>-->
+
+    <!--<job:dataflow id="myStreamJob"-->
+                  <!--registry-center-ref="regCenter"-->
+                  <!--job-ref="myDataflowJob"-->
+                  <!--cron="0/2 * * * * ?"-->
+                  <!--sharding-total-count="10"-->
+                  <!--overwrite="true"-->
+                  <!--sharding-item-parameters="0=shard-0,1=shard-1"-->
+                  <!--streaming-process="true">-->
+
+        <!--<job:distributed-listener class="com.leokongwq.elasticjob.elasticjobdemo.job.MyDistributeJobListener"-->
+                                  <!--started-timeout-milliseconds="5" completed-timeout-milliseconds="5"/>
+
+    </job:dataflow>
+    -->
+</beans>
